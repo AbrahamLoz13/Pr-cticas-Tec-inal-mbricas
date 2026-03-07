@@ -1,0 +1,28 @@
+Comunicación inalámbrica Arduino UNO - ESP32 usando NRF24L01
+
+Conexiones Arduino UNO → NRF24L01
+
+| NRF24L01 | Arduino UNO |
+| VCC | 3.3V |
+| GND | GND |
+| CE | Pin 9 |
+| CSN | Pin 10 |
+| SCK | Pin 13 |
+| MOSI | Pin 11 |
+| MISO | Pin 12 |
+
+| CAPACITOR | PATA LARGA A 3.3 V/ PATA CORTA GND |
+
+
+Conexiones ESP32 → NRF24L01
+
+| NRF24L01 | ESP32 |
+| VCC | 3.3V |
+| GND | GND |
+| CE | GPIO 4 |
+| CSN | GPIO 5 |
+| SCK | GPIO 18 |
+| MOSI | GPIO 23 |
+| MISO | GPIO 19 |
+
+| CAPACITOR | PATA LARGA A 3.3 V/ PATA CORTA GND |

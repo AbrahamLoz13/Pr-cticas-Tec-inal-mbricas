@@ -1,0 +1,51 @@
+Conexiones del BOTÓN al Arduino (Transmisor)
+
+Componente	Conexión
+Botón pata 1	Pin 8 del Arduino
+Botón pata 2	GND
+Resistencia 10kΩ	Entre pin 8 y 5V
+
+Esquema simple:
+
+5V ----[10kΩ]---- Pin 8 ---- Botón ---- GND
+
+
+
+Conexiones del LED al ESP32 (Receptor)
+
+Componente	Conexión
+LED pata larga (ánodo)	GPIO 2
+LED pata corta (cátodo)	Resistencia 220Ω
+Resistencia	GND
+
+Esquema:
+
+GPIO2 ---- LED ----[220Ω]---- GND
+
+Cuando el ESP32 recibe 1 → LED prende.
+
+Conexión del nRF24L01 al ESP32
+
+NRF24L01	ESP32
+VCC	3.3V
+GND	GND
+CE	GPIO 4
+CSN	GPIO 5
+SCK	GPIO 18
+MOSI	GPIO 23
+MISO	GPIO 19
+
+
+El nRF24L01 usa 3.3V, no 5V.
+
+Conexión del nRF24L01 al Arduino UNO
+NRF24L01	Arduino
+VCC	3.3V
+GND	GND
+CE	9
+CSN	10
+SCK	13
+MOSI	11
+MISO	12
+
+capacitor de 10µF o 100µF entre VCC y GND del módulo:

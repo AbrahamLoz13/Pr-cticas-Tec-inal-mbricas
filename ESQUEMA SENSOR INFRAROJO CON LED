@@ -1,0 +1,28 @@
+ESQUEMA DE CONEXIONES
+Transmisor (Arduino UNO + NRF24L01 + Sensor IR)
+NRF24L01
+
+VCC → 3.3V(NO 5V)
+GND → GND
+CE → Pin 9
+CSN → Pin 10
+SCK → Pin 13
+MOSI → Pin 11
+MISO → Pin 12
+
+Sensor Infrarrojo
+VCC → 5V (la mayoría funciona mejor a 5V)
+GND → GND
+OUT → Pin 7
+
+Receptor (ESP32 + NRF24L01 + LED)
+NRF24L01
+VCC → 3.3V
+GND → GND
+CE → Pin 4
+CSN → Pin 5
+SCK → Pin 18
+MOSI → Pin 23
+MISO → Pin 19
+LED
+Pin 2

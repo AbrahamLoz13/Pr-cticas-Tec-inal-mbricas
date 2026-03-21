@@ -1,0 +1,14 @@
+Diagramas de Conexión
+Transmisor (Arduino Uno)
+
+Sensor PIR (HC-SR501): VCC a 5V, GND a GND, OUT a Pin digital 8.
+
+NRF24L01: VCC a 3.3V (estrictamente), GND a GND, CE a Pin 9, CSN a Pin 10, MOSI a Pin 11, MISO a Pin 12, SCK a Pin 13.
+
+Receptor (ESP32)
+
+NRF24L01: VCC a 3.3V, GND a GND, CE a Pin 4, CSN a Pin 5, SCK a Pin 18, MISO a Pin 19, MOSI a Pin 23.
+
+Pantalla OLED (I2C): vdd a 3.3V, gnd a GND, sda a Pin 21, sck a Pin 22.
+
+Buzzer Activo: Pata larga (+) a Pin 25, pata corta (-) a GND.

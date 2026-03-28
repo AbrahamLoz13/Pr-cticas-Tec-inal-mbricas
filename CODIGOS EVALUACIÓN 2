@@ -1,0 +1,137 @@
+CODIGO TRANSMISOR ARDUINO:
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+
+RF24 radio(9, 10);
+const byte direccion[6] = "00001";
+const int sensorPIR = 8;
+
+int estadoAnterior = -1;
+int estadoActual;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(sensorPIR, INPUT);
+
+  radio.begin();
+  radio.setChannel(108);
+  radio.setDataRate(RF24_250KBPS);
+  radio.setPALevel(RF24_PA_LOW); // Ajustar a HIGH o MAX según la distancia requerida
+  radio.openWritingPipe(direccion);
+  radio.stopListening();
+}
+
+void loop() {
+  estadoActual = digitalRead(sensorPIR);
+
+  if (estadoActual != estadoAnterior) {
+    radio.write(&estadoActual, sizeof(estadoActual));
+    estadoAnterior = estadoActual; 
+  }
+  delay(10); 
+}
+
+
+
+CODIGO RECEPTOR ESP32:
+
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define ANCHO_PANTALLA 128
+#define ALTO_PANTALLA 64
+Adafruit_SSD1306 display(ANCHO_PANTALLA, ALTO_PANTALLA, &Wire, -1);
+
+RF24 radio(4, 5);
+const byte direccion[6] = "00001";
+
+const int buzzer = 25;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(buzzer, OUTPUT);
+  
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println("Fallo al iniciar OLED");
+    while(1);
+  }
+  
+  display.clearDisplay();
+  display.setTextColor(SSD1306_WHITE);
+  display.setTextSize(1);
+  display.setCursor(0, 0);
+  display.println("Sistema Listo");
+  display.display();
+
+  SPI.begin(18, 19, 23);
+  if (!radio.begin()) {
+    Serial.println("NRF no detectado");
+    while (1);
+  }
+  radio.setChannel(108);
+  radio.setDataRate(RF24_250KBPS);
+  radio.setPALevel(RF24_PA_LOW);
+  radio.openReadingPipe(0, direccion);
+  radio.startListening();
+}
+
+void loop() {
+  if (radio.available()) {
+    int valor;
+    radio.read(&valor, sizeof(valor));
+    
+    display.clearDisplay();
+    display.setCursor(0, 20);
+    display.setTextSize(2);
+
+    if (valor == 1) { 
+      digitalWrite(buzzer, HIGH);
+      display.println("CLIENTE");
+      display.println("DETECTADO");
+      
+      // Transmisión de la cadena clave para el middleware
+      Serial.println("NUEVO_CLIENTE"); 
+    } else {
+      digitalWrite(buzzer, LOW);
+      display.println("ESPERANDO...");
+    }
+    
+    display.display();
+  }
+}
+
+CODIGO PYTHON:
+import serial
+import datetime
+from pymongo import MongoClient
+
+# Conexión al motor de base de datos
+cliente_mongo = MongoClient("mongodb://localhost:27017/")
+db = cliente_mongo["mariscos_el_28"]
+coleccion = db["registros_acceso"]
+
+# Configuración de la interfaz serial (Ajustar el puerto COM según corresponda)
+puerto_esp32 = serial.Serial('COM3', 115200)
+
+print("Sistema de registro iniciado. Escuchando al ESP32...")
+
+while True:
+    if puerto_esp32.in_waiting > 0:
+        lectura = puerto_esp32.readline().decode('utf-8').strip()
+        
+        if lectura == "NUEVO_CLIENTE":
+            hora_actual = datetime.datetime.now()
+            
+            documento = {
+                "evento": "llegada_cliente",
+                "fecha_hora": hora_actual,
+                "sucursal": "Principal"
+            }
+            
+            coleccion.insert_one(documento)
+            print(f"Registro guardado exitosamente: {hora_actual}")

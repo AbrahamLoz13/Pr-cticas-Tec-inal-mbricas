@@ -1,0 +1,26 @@
+Componente Físico,Terminal del Componente,Conexión en ESP32,Función
+Módulo NRF24L01,VCC,3.3V,Alimentación de radiofrecuencia
+,GND,GND,Tierra común
+,CE,Pin Digital 4,Habilitación del chip (Chip Enable)
+,CSN,Pin Digital 5,Selección de esclavo SPI (Chip Select)
+,MOSI,Pin Digital 23,Salida de datos maestro (SPI)
+,MISO,Pin Digital 19,Entrada de datos maestro (SPI)
+,SCK,Pin Digital 18,Señal de reloj sincronizada (SPI)
+Pantalla OLED (I2C),VDD / VCC,3.3V,Alimentación del display
+,GND,GND,Tierra común
+,SDA,Pin Digital 21,Línea de datos bidireccional (I2C)
+,SCK / SCL,Pin Digital 22,Línea de reloj sincronizada (I2C)
+Buzzer Activo,Positivo (+) / Pata Larga,Pin Digital 25,Señal digital de activación sonora
+,Negativo (-) / Pata Corta,GND,Tierra común
+
+Componente Físico,Terminal del Componente,Conexión en Arduino Uno,Función
+Sensor PIR (HC-SR501),VCC,5V,Alimentación del sensor
+,GND,GND,Tierra común
+,OUT (Señal),Pin Digital 8,Salida del pulso de detección
+Módulo NRF24L01,VCC,3.3V (¡Estricto!),Alimentación de radiofrecuencia
+,GND,GND,Tierra común
+,CE,Pin Digital 9,Habilitación del chip (Chip Enable)
+,CSN,Pin Digital 10,Selección de esclavo SPI (Chip Select)
+,MOSI,Pin Digital 11,Salida de datos maestro (SPI)
+,MISO,Pin Digital 12,Entrada de datos maestro (SPI)
+,SCK,Pin Digital 13,Señal de reloj sincronizada (SPI)

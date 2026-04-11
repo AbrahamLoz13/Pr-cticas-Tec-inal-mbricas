@@ -1,0 +1,72 @@
+PN532        →    ESP32 (GPIO)
+--------------------------------
+VCC          →    3.3V o 5V
+GND          →    GND
+SCK          →    GPIO 18
+MISO         →    GPIO 19
+MOSI         →    GPIO 23
+SS (SDA)     →    GPIO 5
+
+
+
+CODIGO:
+
+#include <Adafruit_PN532.h>
+
+// Definición de pines SPI
+#define PN532_SCK  (18)
+#define PN532_MISO (19)
+#define PN532_MOSI (23)
+#define PN532_SS   (5)
+
+// Crear objeto NFC
+Adafruit_PN532 nfc(PN532_SCK, PN532_MISO, PN532_MOSI, PN532_SS);
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("Iniciando lector NFC...");
+
+  nfc.begin();
+
+  uint32_t versiondata = nfc.getFirmwareVersion();
+  if (!versiondata) {
+    Serial.println("No se encontró el PN532");
+    while (1);
+  }
+
+  nfc.SAMConfig(); // Configuración del módulo
+  Serial.println("Esperando tarjeta...");
+}
+
+void loop() {
+  uint8_t success;
+  uint8_t uid[] = {0,0,0,0,0,0,0};
+  uint8_t uidLength;
+
+  // Leer tarjeta
+  success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength);
+
+  if (success) {
+    Serial.println("TARJETA DETECTADA");
+
+    // HEX
+    Serial.print("HEX: ");
+    nfc.PrintHex(uid, uidLength);
+
+    // DECIMAL
+    Serial.print("DEC: ");
+    for (uint8_t i = 0; i < uidLength; i++) {
+      Serial.print(uid[i], DEC);
+      Serial.print(" ");
+    }
+    Serial.println();
+
+    // BINARIO
+    Serial.print("BIN: ");
+    for (uint8_t i = 0; i < uidLength; i++) {
+      Serial.print(uid[i], BIN);
+      Serial.print(" ");
+    }
+    Serial.println("\n-----------------");
+  }
+}

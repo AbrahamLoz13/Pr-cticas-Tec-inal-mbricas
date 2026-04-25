@@ -1,0 +1,132 @@
+ESQUEMA: 
+Pin Módulo PN532,Pin Microcontrolador ESP32,Descripción de la conexión
+VCC,3.3V,Alimentación de energía
+GND,GND,Tierra física común
+SDA,GPIO 21,Línea de datos bidireccional
+SCL,GPIO 22,Línea de reloj de sincronización
+
+ARDUINO: #include <Wire.h>
+#include <Adafruit_PN532.h>
+
+// Definición de pines para I2C
+#define SDA_PIN 21
+#define SCL_PIN 22
+
+Adafruit_PN532 nfc(SDA_PIN, SCL_PIN);
+
+void setup(void) {
+  Serial.begin(115200);
+  nfc.begin();
+
+  uint32_t versiondata = nfc.getFirmwareVersion();
+  if (!versiondata) {
+    Serial.print("No se encontró el módulo PN532");
+    while (1);
+  }
+  
+  // Configuración del módulo para lectura de tarjetas
+  nfc.SAMConfig();
+}
+
+void loop(void) {
+  uint8_t success;
+  uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };
+  uint8_t uidLength;
+
+  success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength);
+
+  if (success) {
+    // #ejemplo de: Salida en Base 16 (Hexadecimal)
+    Serial.print("HEX:");
+    for (uint8_t i = 0; i < uidLength; i++) {
+      if (uid[i] < 0x10) Serial.print("0");
+      Serial.print(uid[i], HEX);
+      if (i < uidLength - 1) Serial.print(" ");
+    }
+    Serial.println();
+
+    // #ejemplo de: Salida en Base 10 (Decimal)
+    Serial.print("DEC:");
+    for (uint8_t i = 0; i < uidLength; i++) {
+      Serial.print(uid[i], DEC);
+      if (i < uidLength - 1) Serial.print(" ");
+    }
+    Serial.println();
+
+    // #ejemplo de: Salida en Base 2 (Binario)
+    Serial.print("BIN:");
+    for (uint8_t i = 0; i < uidLength; i++) {
+      for (int b = 7; b >= 0; b--) {
+        Serial.print(bitRead(uid[i], b));
+      }
+      if (i < uidLength - 1) Serial.print(" ");
+    }
+    Serial.println();
+
+    delay(2000);
+  }
+}
+
+
+PYTHON: 
+PYTHON: import tkinter as tk
+import serial
+import threading
+
+# Configuración del puerto
+PUERTO_COM = 'COM4' # #ejemplo de: Ajustar según el puerto detectado
+BAUDIOS = 115200
+UID_MAESTRO = "B1 97 15 07" # #ejemplo de: UID válido para acceso
+
+class AppAcceso:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Control de Acceso NFC")
+        self.root.geometry("400x300")
+
+        self.label_titulo = tk.Label(root, text="Lector NFC", font=("Arial", 16))
+        self.label_titulo.pack(pady=10)
+
+        self.label_status = tk.Label(root, text="Esperando tarjeta...", font=("Arial", 12), fg="blue")
+        self.label_status.pack(pady=20)
+
+        self.label_uid = tk.Label(root, text="UID: ----", font=("Courier", 10))
+        self.label_uid.pack(pady=10)
+
+        self.ser = None
+        self.conectar_serial()
+        
+        # Hilo para no bloquear la interfaz gráfica
+        self.hilo = threading.Thread(target=self.leer_serial, daemon=True)
+        self.hilo.start()
+
+    def conectar_serial(self):
+        try:
+            self.ser = serial.Serial(PUERTO_COM, BAUDIOS, timeout=1)
+        except Exception as e:
+            self.label_status.config(text="Error de conexión COM", fg="red")
+
+    def leer_serial(self):
+        while self.ser and self.ser.is_open:
+            try:
+                linea = self.ser.readline().decode('utf-8').strip()
+                if linea.startswith("HEX:"):
+                    uid_leido = linea.split(":")[1].strip()
+                    self.validar_acceso(uid_leido)
+            except:
+                break
+
+    def validar_acceso(self, uid):
+        self.label_uid.config(text=f"UID: {uid}")
+        if uid == UID_MAESTRO:
+            self.label_status.config(text="ACCESO CONCEDIDO", fg="green")
+        else:
+            self.label_status.config(text="ACCESO DENEGADO", fg="red")
+        
+        # Regresar a estado inicial tras 3 segundos
+        self.root.after(3000, lambda: self.label_status.config(text="Esperando tarjeta...", fg="blue"))
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = AppAcceso(root)
+    root.mainloop()
